@@ -22,6 +22,7 @@ import retrofit2.Retrofit;
 
 public class NetworkService {
     private Context context;
+    Client client;
     public NetworkService(Context context)
     {
         this.context = context;
@@ -29,20 +30,21 @@ public class NetworkService {
     public void loadJSON(){
 
         try{
+            client = new Client(context);
 
-
-            if (!isNetworkAvailable()){
+           /* if (!client.isNetworkAvailable()){
                 Toast.makeText(context.getApplicationContext(), "Check Internet Settings", Toast.LENGTH_SHORT).show();
                 if(((MainActivity)(context)).progressDialog!=null && ((MainActivity)(context)).progressDialog.isShowing()) {
                     ((MainActivity)(context)).progressDialog.dismiss();
                     ((MainActivity)(context)).progressDialog = null;
                 }
                 return;
-            }
+            }*/
             //Cache cache = new Cache(getCacheDir(), cacheSize);
 
 
-            Retrofit retrofit = Client.getClient();
+           // Retrofit retrofit = client.getClient(); // Normall call without cache
+            Retrofit retrofit = client.getRetrofit(); // with Cache offline
             Service apiService = retrofit.create(Service.class);
 
             Call<Movies> call = apiService.reposMovies();
@@ -50,8 +52,8 @@ public class NetworkService {
                 @Override
                 public void onResponse(Call<Movies> call, Response<Movies> response) {
                     Movies movies = response.body();
-                    //Collections.sort(movies, Movie.BY_NAME_ALPHABETICAL);
-                   // movieList=movies.getData();
+
+
                     ((MainActivity)context).showView(movies.getData());
 
 
@@ -80,10 +82,5 @@ public class NetworkService {
         }
     }
 
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }
+
 }
